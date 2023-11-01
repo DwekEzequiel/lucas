@@ -1,6 +1,25 @@
 {
   "dependencies": {
     "express": "^4.18.2",
+    "mysql": "^2.18.1",
     "mysql2": "^3.6.2"
-  }
+  },
+  "name": "lucas",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DwekEzequiel/lucas.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DwekEzequiel/lucas/issues"
+  },
+  "homepage": "https://github.com/DwekEzequiel/lucas#readme",
+  "description": ""
 }
