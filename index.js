@@ -12,20 +12,20 @@ const bcrypt = require('bcrypt');
 
 const dbConfig = {
   host: 'aws.connect.psdb.cloud',
-  user: '7lcy0uekfz7ryimdjts3',
-  password: 'pscale_pw_RkqIXv1AVouoUHk5ka80uf0b7q7iONRgmNLOHeUV8VO',
+  user: 'uyd1z23idjdah1xqursr',
+  password: 'pscale_pw_zXg1reSJEo4uW5yDxRt3o3yNsiPVwVNpfDhLcTPAmGJ',
   database: 'burgertic',
   ssl: {
       rejectUnauthorized: true
   }
 
 };
-const db = mysql.createConnection(dbConfig);
+const connection = mysql.createConnection(dbConfig);
 
 
 
 
-db.connect((err) => {
+connection.connect((err) => {
   if (err) {
     console.error('Error al conectar a la base de datos:', err);
   } else {
@@ -34,7 +34,7 @@ db.connect((err) => {
 });
 
 
-//Crear un endpoint GET /menu que devuelva el menú completo del restaurante.
+//--------MENU COMPLETO-----------------
 app.get('/menu', (_, res) => {
     connection.query('SELECT * FROM platos', (err, rows) => {
         if (err) {
@@ -45,7 +45,7 @@ app.get('/menu', (_, res) => {
     });
 });
 
-//Crear un endpoint GET /menu/:id que devuelva el plato con el id indicado.
+//---------BUSCO PLATO EN MENU CON ID 
 app.get('/menu/:id', (req, res) => {
     connection.query('SELECT * FROM platos WHERE id = ?', [req.params.id], (err, rows) => {
         if (err) {
@@ -58,7 +58,7 @@ app.get('/menu/:id', (req, res) => {
     });
 });
 
-//Crear un endpoint GET /combos que devuelva únicamente los combos del menú.
+//--------MUESTRO COMBOS-------------
 app.get('/combos', (_, res) => {
     connection.query('SELECT * FROM platos WHERE tipo = ?', ['combo'], (err, rows) => {
         if (err) {
@@ -69,7 +69,7 @@ app.get('/combos', (_, res) => {
     });
 });
 
-//Crear un endpoint GET /principales que devuelva únicamente los platos principales del menú.
+//--------MUESTRO PLATOS PRINCIPALES-----------
 app.get('/principales', (_, res) => {
     connection.query('SELECT * FROM platos where tipo = ?',['principal'],(err,rows)=>{
         if(err){
@@ -80,7 +80,7 @@ app.get('/principales', (_, res) => {
     });
 });
 
-//Crear un endpoint GET /postres que devuelva únicamente los postres del menú.
+//-------MUESTRO POSTRES----------
 app.get('/postres', (_, res) => {
     connection.query('SELECT * FROM platos where tipo = ?',['postre'],(err,rows)=>{
         if(err){
@@ -90,11 +90,12 @@ app.get('/postres', (_, res) => {
     });
 });
 
-//Crear un endpoint POST /pedido que reciba un array de id's de platos y devuelva el precio total del pedido. El array de platos debe ser pasado en el cuerpo de la petición. 
+//---------MUESTRO PRECIO TOTAL DE LOS PLATOS INDICADOS--------
 
 app.post('/pedido', (req, res) => {
   const { productos } = req.body;
-  const { idusuario } = req.headers.authorization;
+  //preguntar a nacho
+  const idusuario = req.headers.authorization;
 
   if (!Array.isArray(productos) || productos.length === 0) {
      return res.status(400).json('La solicitud debe incluir un array de platos o al menos un plato');
@@ -151,16 +152,17 @@ app.post('/pedido', (req, res) => {
           );
         });
       });
-   //Crear un endpoint que permita obtener todos los pedidos de un usuario (GET /pedidos/:id).
-   
-app.get("/pedidos/:id", (req, res) => {
-    const id = req.params.id;
+
+//------------MUESTRO PEDIDOS DEL USUARIO-----------------   
+app.get("/pedidos", (req, res) => {
+  const id = req.headers.authorization;
+    
     connection.query("SELECT pedidos.*, platos.*, pedidos_platos.id_pedido, pedidos_platos.cantidad FROM pedidos INNER JOIN pedidos_platos ON pedidos.id = pedidos_platos.id_pedido INNER JOIN platos ON pedidos_platos.id_plato=platos.id WHERE pedidos.id_usuario=?", id, (err, result) => {
     if (err) {
       return res.status(500).json(err);
     }
     if(result.length === 0 || !result) {
-      return res.status(404).json({ error: 'Pedido no encontrado' });
+      return res.status(200).json([]);
      }
      else {
      let pedidos = [];
@@ -196,7 +198,7 @@ app.get("/pedidos/:id", (req, res) => {
     });
 });
 
-//Crear un endpoint que permita registrar un usuario (POST /usuarios).
+//--------REGISTER------------- ok
 app.post("/usuarios", (req, res) => {
   const {nombre, apellido, email, password} = req.body;
   if (!nombre || !apellido || !email || !password) {
@@ -219,7 +221,7 @@ app.post("/usuarios", (req, res) => {
         return res.status(500).json("No se pudo insertar correctamente", err); 
       }
       const userId = result.insertId;
-      return res.status(201).json({id: userId});
+      return res.status(200).json({id: userId});
         
         
       });
@@ -230,6 +232,7 @@ app.post("/usuarios", (req, res) => {
   }
 });
 
+//--------LOGIN-------------- ok
 app.post("/login", (req, res) => {
 const { email, password } = req.body;
 if (!email || !password) {
@@ -247,7 +250,7 @@ connection.query("SELECT * FROM usuarios WHERE email = ?", email, (err, result) 
     return res.status(401).json("Usuario o contraseña incorrectos");
   }
   return res.status(200).json({ 
-  id: usuario.ID,
+  id: usuario.id,
   nombre: usuario.nombre,
   apellido: usuario.apellido,
   email: usuario.email, 
